@@ -34,6 +34,8 @@ import {
   SpinnerIcon,
 } from "@chakra-ui/icons";
 import { FiPhoneOff } from "react-icons/fi";
+import { ResponsivePie } from "@nivo/pie";
+
 import { useGetBottomHeirarchy, useGetTopHeirarchy } from "@/services/staff.service";
 
 const statuses = [
@@ -294,7 +296,7 @@ export const Dashboard = () => {
       <DashboardSection dataArray={TOTAL_LEADS} title={"Total Lead"} />
       <DashboardSection dataArray={TOTAL_EARNING} title={"Total Commission"} />
 
-      <Box>
+      {/* <Box>
         <Text fontSize={20} fontWeight={500} mb={5}>
           {"Team Dashboard"}
         </Text>
@@ -356,7 +358,77 @@ export const Dashboard = () => {
             );
           })}
         </Flex>
-      </Box>
+
+        
+
+      </Box> */}
+
+        <Box
+          p={5}
+          mt={10}
+          width="50%"
+          bg="white"
+          borderRadius="lg"
+          boxShadow="md"
+          height="500px"
+        >
+          <Flex justify="space-between" align="center" mb={4}>
+            <Text fontSize="lg" fontWeight="bold">
+              Team Dashboard
+            </Text>
+
+            {/* Team Member Select inside the chart box */}
+            <Controller
+              name="teamLead"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  placeholder="Select Team Member"
+                  size="sm"
+                  width="200px"
+                >
+                  {map(teamList, (staff) => (
+                    <option key={staff._id} value={staff._id}>
+                      {staff.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            />
+          </Flex>
+
+          <ResponsivePie
+            data={statuses.map((item) => {
+              const count =
+                find(teamDashboard, (team) => team?.status === item.label)?.count || 0;
+              return {
+                id: item.label,
+                label:
+                  item.label
+                    .replace(/_/g, " ")
+                    .toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()) + ` (${count})`,
+                value: count,
+                color: item.color,
+              };
+            })}
+            margin={{ top: 40, right: 30, bottom: 40, left: 10 }}
+            innerRadius={0.5}
+            padAngle={1}
+            cornerRadius={4}
+            activeOuterRadiusOffset={8}
+            borderWidth={1}
+            borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
+            arcLinkLabelsSkipAngle={10}
+            arcLinkLabelsTextColor="#333"
+            arcLinkLabelsThickness={2}
+            arcLinkLabelsColor={{ from: "color" }}
+            arcLabelsSkipAngle={10}
+            arcLabelsTextColor={{ from: "color", modifiers: [["darker", 2]] }}
+          />
+        </Box>
+
     </Box>
   );
 };
