@@ -1,8 +1,17 @@
-import { Box, Button, SimpleGrid, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Text,
+} from "@chakra-ui/react";
 import { PageHeading } from "../../common/PageHeading";
 import { useEffect } from "react";
 import { useMeetingStore } from "@/store/meeting";
-import { map } from "lodash";
 import { LoadingContainer } from "@/common/LoadingContainer";
 import { STATUS } from "@/constant";
 import dayjs from "dayjs";
@@ -31,34 +40,40 @@ export const Meeting = () => {
             desc="Wait For Next Meeting Schedule"
           />
         ) : (
-          <SimpleGrid columns={4} gap={16} mt={3} textAlign={"left"}>
-            {map(meetings, (meet) => {
-              return (
-                <Box
-                  borderRadius={"md"}
-                  p={2}
-                  pl={5}
-                  textAlign={"center"}
-                  border={"2px"}
-                  borderColor={"gray.400"}
-                >
-                  <Text as={"b"} fontSize={"xl"}>
-                    {meet.title}
-                  </Text>
-                  <Text as={"p"} fontSize={"lg"} mt={2} color={"gray.600"}>
-                    {dayjs(meet.dateTime).format("dddd, MMMM D, YYYY h:mm A")}
-                  </Text>
-                  {meet.url ? (
-                    <Button mt={3} colorScheme="green">
-                      <a href={meet.url} target="_blank">
-                        Join Now
-                      </a>
-                    </Button>
-                  ) : null}
-                </Box>
-              );
-            })}
-          </SimpleGrid>
+          <Box overflowX="auto" mt={5}>
+            <Table variant="simple">
+              <Thead bg="gray.100">
+                <Tr>
+                  <Th>Title</Th>
+                  <Th>Date & Time</Th>
+                  <Th>Action</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {meetings.map((meet, idx) => (
+                  <Tr key={idx}>
+                    <Td>
+                      <Text as="b">{meet.title}</Text>
+                    </Td>
+                    <Td>
+                      {dayjs(meet.dateTime).format(
+                        "dddd, MMMM D, YYYY h:mm A"
+                      )}
+                    </Td>
+                    <Td>
+                      {meet.url ? (
+                        <Button colorScheme="green" as="a" href={meet.url} target="_blank">
+                          Join Now
+                        </Button>
+                      ) : (
+                        <Text color="gray.500">No link</Text>
+                      )}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
         )}
       </LoadingContainer>
     </Box>
