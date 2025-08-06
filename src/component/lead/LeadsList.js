@@ -23,12 +23,13 @@ import {
   Tooltip,
   useDisclosure,
   Switch,
+  CloseButton,
 } from "@chakra-ui/react";
 import { LeadDrawer } from "./LeadDrawer";
 import { TimelineModal } from "./TimeLineModal";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useLeadStore } from "../../store/lead";
-import { filter, find, map, orderBy } from "lodash";
+import { filter, find, map, orderBy, size } from "lodash";
 import {
   createColumnHelper,
   flexRender,
@@ -52,7 +53,7 @@ import { MeetingModal } from "./MeetingModal";
 import { MeetingListModal } from "./MeetingListModal";
 import { threeDotsCss } from "@/theme";
 import { getDateRanges } from "@/utils/Helper";
-
+import { LeadColloboratorModal } from "./collebratorModal";
 const columnHelper = createColumnHelper();
 export const LeadsList = ({ payload }) => {
   const [leadsId, setLeadsId] = useState();
@@ -61,6 +62,9 @@ export const LeadsList = ({ payload }) => {
   const [leadStatus, setLeadStatus] = useState();
   const [leadType, setLeadType] = useState("");
   const [staffId, setStaffId] = useState();
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedLeads, setSelectedLeads] = useState([]);
+  
   const { handleSubmit, control, getValues, setValue, watch, onChange } = useForm();
 
   const range = watch('rangeDate');
@@ -101,6 +105,13 @@ export const LeadsList = ({ payload }) => {
     onOpen: onOpenMeetingModal,
   } = useDisclosure();
 
+  // Add collaborator modal
+  const {
+    isOpen: isColloboratorModal,
+    onOpen: onOpenColloboratorModal,
+    onClose: onCloseColloboratorModal,
+  } = useDisclosure();
+
   const {
     getLeadsAction,
     getLeadsStatus,
@@ -132,6 +143,37 @@ export const LeadsList = ({ payload }) => {
 
   const addMeetingStatus = useMeetingStore((s) => s.addMeetingStatus);
   const addLeadFollowUpStatus = useLeadStore((s) => s.addLeadFollowUpStatus);
+
+  // Handle row selection
+  const handleSelectRow = (lead) => {
+    setSelectedRows((prevSelectedRows) =>
+      prevSelectedRows.includes(lead?._id)
+        ? prevSelectedRows.filter((rowId) => rowId !== lead?._id)
+        : [...prevSelectedRows, lead?._id]
+    );
+    setSelectedLeads((prevSelectedRows) =>
+      prevSelectedRows.find((l) => l?._id === lead?._id)
+        ? prevSelectedRows.filter((rowId) => rowId?._id !== lead?._id)
+        : [...prevSelectedRows, lead]
+    );
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (selectedRows.length === table.getRowModel().rows.length) {
+      setSelectedRows([]);
+      setSelectedLeads([]);
+    } else {
+      const allRowIds = table.getRowModel().rows.map((row) => row.original._id);
+      setSelectedRows(allRowIds);
+      setSelectedLeads(map(table.getRowModel().rows, (r) => r.original));
+    }
+  };
+
+  // Handle assign collaborator
+  const handleAssignCollaborator = () => {
+    // onOpenColloboratorModal();
+  };
 
   UseStatusCheck({
     status: addMeetingStatus,
@@ -369,7 +411,6 @@ export const LeadsList = ({ payload }) => {
     getStateAction();
   }, [getStateAction]);
 
-
   const [teamLeader, setTeamLeader] = useState([]);
   const [trainers, setTrainers] = useState();
 
@@ -377,9 +418,11 @@ export const LeadsList = ({ payload }) => {
   const teamLeaderId = watch('districtManagerId');
   const trainerId = watch('trainerId');
   const { getTeam, teamStatus, teamList, getTeamDashboard, teamReportStatus, teamDashboard } = useLeadStore();
+  
   useEffect(() => {
     getTeam();
   }, [])
+  
   useEffect(() => {
     if (userData?.role === 'GROWTH_PARTNER') {
       const teamLeadList = filter(
@@ -388,7 +431,6 @@ export const LeadsList = ({ payload }) => {
       );
       setTeamLeader(teamLeadList);
     } else if (userData?.role === 'TEAM_LEADER') {
-
       const teamLeadList = filter(
         teamList,
         (staff) => staff.districtManagerId === userData?._id && staff?.role === 'TRAINER'
@@ -396,7 +438,6 @@ export const LeadsList = ({ payload }) => {
       setTrainers(teamLeadList);
     }
   }, [userData, teamList]);
-
 
   useEffect(() => {
     if (teamLeaderId) {
@@ -408,11 +449,15 @@ export const LeadsList = ({ payload }) => {
     }
   }, [teamLeaderId]);
 
-
   const districtData = useMemo(
     () => find(states, (state) => state.name == selectedState),
     [selectedState, states]
   );
+
+  const handleViewCollaborator = (id = null) => {
+    onOpenColloboratorModal();
+    setLeadsId(id);
+  };
 
   const handleStatus = (status, leadId, data) => {
     if (status !== "CONVERTED") {
@@ -584,6 +629,31 @@ export const LeadsList = ({ payload }) => {
           setCurrentPage={setCurrentPage}
         />
       </Flex>
+
+      {/* Selected rows actions */}
+      {size(selectedRows) > 0 ? (
+        <Flex align="center" w="100%" my={3}>
+          <CloseButton
+            onClick={() => {
+              setSelectedRows([]);
+              setSelectedLeads([]);
+            }}
+            fontSize={14}
+            color={"red"}
+            mr={1}
+          />
+          <Text>{`${size(selectedRows)} Leads Selected`}</Text>
+          <Button
+            size="sm"
+            colorScheme="blue"
+            ml={5}
+            // onClick={handleAssignCollaborator}
+          >
+            Assign Collaborator
+          </Button>
+        </Flex>
+      ) : null}
+
       <LoadingContainer
         loading={
           getLeadsStatus === STATUS.FETCHING ||
@@ -602,6 +672,17 @@ export const LeadsList = ({ payload }) => {
             <Thead>
               {table?.getHeaderGroups().map((headerGroup) => (
                 <Tr key={headerGroup.id}>
+                  {/* Checkbox header */}
+                  <Th>
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedRows.length === table.getRowModel().rows.length &&
+                        table.getRowModel().rows.length > 0
+                      }
+                      onChange={handleSelectAll}
+                    />
+                  </Th>
                   {map(headerGroup.headers, (header) => {
                     return (
                       <Th h={10} left={0} key={header.id}>
@@ -629,6 +710,14 @@ export const LeadsList = ({ payload }) => {
                   );
                   return (
                     <Tr key={row.original?._id} color="gray.500">
+                      {/* Checkbox cell */}
+                      <Td>
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(row.original._id)}
+                          onChange={() => handleSelectRow(row.original)}
+                        />
+                      </Td>
                       {row.getVisibleCells().map((cell) => {
                         return (
                           <Td
@@ -722,7 +811,25 @@ export const LeadsList = ({ payload }) => {
                                 : "Add Followup"}
                             </Box>
                           )}
+                          {/* Add Meeting option */}
+                          {/* <Box
+                            color="purple.400"
+                            onClick={() => handleMeetingModal(row.original?._id)}
+                            cursor="pointer"
+                          >
+                            Add Meeting
+                          </Box> */}
 
+                          <Box
+                              color="blue.400"
+                              border={1}
+                              onClick={() =>
+                                handleViewCollaborator(row.original?._id)
+                              }
+                              cursor="pointer"
+                            >
+                              View Colloborators
+                            </Box>
                           <Box
                             color="red.400"
                             onClick={() =>
@@ -748,11 +855,12 @@ export const LeadsList = ({ payload }) => {
                 })
               ) : (
                 <Tr>
-                  <Td colSpan={6}>
+                  <Td colSpan={7}>
                     <EmptyBox title="Leads not found" />
                   </Td>
-                </Tr>
-              )}
+                  </Tr>
+                )
+              }
             </Tbody>
           </Table>
         </TableContainer>
@@ -806,6 +914,23 @@ export const LeadsList = ({ payload }) => {
         <MeetingListModal
           isOpen={isMeetingListModal}
           onClose={onCloseMeetingListModal}
+          leadId={leadsId}
+        />
+      )}
+
+      {/* Collaborator Assignment Modal */}
+      {/* {isColloboratorModal && (
+        <AssignCollaboratorModal
+          isOpen={isColloboratorModal}
+          onClose={onCloseColloboratorModal}
+          leads={selectedLeads}
+        />
+      )} */}
+
+      {isColloboratorModal && (
+        <LeadColloboratorModal
+          isOpen={isColloboratorModal}
+          onClose={onCloseColloboratorModal}
           leadId={leadsId}
         />
       )}
