@@ -17,9 +17,13 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { useMeetingStore } from "../../store/meeting";
 import {STATUS} from '../../constant'
+import { useLoginStore } from "@/store/login";
 
 export const MeetingModal = ({ isOpen, onClose, leadId, status }) => {
   const { control, setValue, handleSubmit, watch } = useForm();
+    const { userData } = useLoginStore((s) => ({
+      userData: s.userData,
+    }));
 
   const { addMeetingAction, addMeetingStatus } = useMeetingStore(
     (s) => ({
@@ -31,6 +35,7 @@ export const MeetingModal = ({ isOpen, onClose, leadId, status }) => {
   const onSubmit = (data) => {
     addMeetingAction({
       leadId,
+      staffId: userData?._id,
       ...data,
     });
   };
