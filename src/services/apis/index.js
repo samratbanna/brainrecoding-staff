@@ -33,6 +33,8 @@ export const URIS = {
   // task
   TASK: "/tasks",
   ALL_TASK: "/tasks/all",
+  CALL_LOGS: "/CallLogs",
+  ALL_CALL_LOGS: "/CallLogs/all",
 };
 
 let api = create({

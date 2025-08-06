@@ -20,7 +20,7 @@ export const useLeadStore = create((set, get) => ({
       getLeadFollowUpStatus: STATUS.NOT_STARTED,
       getLeadsStatus: STATUS.NOT_STARTED,
       leadConvertStatus: STATUS.NOT_STARTED,
-      updateLeadsStatus: STATUS.NOT_STARTED
+      updateLeadsStatus: STATUS.NOT_STARTED,
     });
   },
   createLeadAction: async (payload) => {
@@ -28,7 +28,8 @@ export const useLeadStore = create((set, get) => ({
     const { ok, data } = await apis.createLeadApi(removeEmptyKeys(payload));
     if (ok) {
       set({
-        createLeadStatus: STATUS.SUCCESS, particularLead: data
+        createLeadStatus: STATUS.SUCCESS,
+        particularLead: data,
       });
       SuccessAlert("Lead Created Successfully");
     } else {
@@ -93,7 +94,9 @@ export const useLeadStore = create((set, get) => ({
     const { data, ok } = await apis.updateLeadsApi(payload);
     let previousData = get().leadsDetails;
     if (ok) {
-      const updatedData = map(previousData.docs, (d) => (data?._id === d?._id ? data : d));
+      const updatedData = map(previousData.docs, (d) =>
+        data?._id === d?._id ? data : d
+      );
       set({
         updateLeadsStatus: STATUS.SUCCESS,
         leadsDetails: { ...previousData, docs: updatedData },
@@ -110,7 +113,10 @@ export const useLeadStore = create((set, get) => ({
     const { data, ok } = await apis.addLeadFollowUpApi(payload);
     let previousData = get().leadFollowUpDetails || [];
     if (ok) {
-      set({ leadFollowUpDetails: [...previousData, data], addLeadFollowUpStatus: STATUS.SUCCESS });
+      set({
+        leadFollowUpDetails: [...previousData, data],
+        addLeadFollowUpStatus: STATUS.SUCCESS,
+      });
       SuccessAlert("Lead FollowUp Added Successfully");
     } else {
       set({ addLeadFollowUpStatus: STATUS.FAILED });
@@ -161,6 +167,35 @@ export const useLeadStore = create((set, get) => ({
     } else {
       ErrorAlert(data?.error || "Something Went Wrong");
       set({ teamReportStatus: STATUS.FAILED });
+    }
+  },
+
+  addCallLogAction: async (payload) => {
+    set({ addCallLogStatus: STATUS.FETCHING });
+    const { data, ok } = await apis.addCallLogsApi(payload);
+    let previousData = get().callLogs || [];
+    if (ok) {
+      set({
+        callLogs: [...previousData, data],
+        addCallLogStatus: STATUS.SUCCESS,
+      });
+      SuccessAlert("LeadFollowUp Added Successfully");
+    } else {
+      set({ addCallLogStatus: STATUS.FAILED });
+      ErrorAlert("Something Went Wrong");
+    }
+  },
+
+  getAllCallLogActions: async (payload) => {
+    set({ getcallLogStatus: STATUS.FETCHING });
+    const { data, ok } = await apis.getAllCallLogsApi(payload);
+    if (ok) {
+      set({
+        callLogs: data,
+        getcallLogStatus: STATUS.SUCCESS,
+      });
+    } else {
+      set({ getcallLogStatus: STATUS.FAILED });
     }
   },
 }));

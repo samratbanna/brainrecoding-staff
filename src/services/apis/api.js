@@ -35,15 +35,22 @@ export const apis = {
   getDashboardApi: (payload) => apiClient.get(URIS.GET_DASHBOARD, payload),
 
   /* Lead Followup */
-  getLeadFollowUpApi: (payload) => apiClient.get(URIS.GET_LEAD_FOLLOWUP, payload),
-  addLeadFollowUpApi: (payload) => apiClient.post(URIS.GET_MEETING_LEAD, payload),
-  getFollowUpLeadApi: (payload) => apiClient.get(URIS.GET_FOLLOWUP_LEAD, payload),
-  getMeetingLeadApi: (payload) => apiClient.get(URIS.GET_FOLLOWUP_LEAD, { ...payload, isMeeting: true }),
+  getLeadFollowUpApi: (payload) =>
+    apiClient.get(URIS.GET_LEAD_FOLLOWUP, payload),
+  addLeadFollowUpApi: (payload) =>
+    apiClient.post(URIS.GET_MEETING_LEAD, payload),
+  getFollowUpLeadApi: (payload) =>
+    apiClient.get(URIS.GET_FOLLOWUP_LEAD, payload),
+  getMeetingLeadApi: (payload) =>
+    apiClient.get(URIS.GET_FOLLOWUP_LEAD, { ...payload, isMeeting: true }),
 
   // ADD MEETING
   addLeadMeetingApi: (payload) => apiClient.post(URIS.ADD_MEETING, payload),
 
   // team
   getTeamList: (payload) => apiClient.get(URIS.GET_TEAM, payload),
-  getTeamReport: (payload) => apiClient.get(URIS.TEAM_DASHBOARD, payload)
+  getTeamReport: (payload) => apiClient.get(URIS.TEAM_DASHBOARD, payload),
+  // add call Logs
+  addCallLogsApi: (payload) => apiClient.post(URIS.CALL_LOGS, payload),
+  getAllCallLogsApi: (payload) => apiClient.get(URIS.ALL_CALL_LOGS, payload),
 };
