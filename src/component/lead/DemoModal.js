@@ -18,15 +18,17 @@ import {
 } from "@chakra-ui/react";
 import { Controller, useForm } from "react-hook-form";
 import { useMeetingStore } from "@/store/meeting";
-import { assign, map, size } from "lodash";
+import { map } from "lodash";
 import { useGetBottomHeirarchy } from "@/services/staff.service";
 import { useLoginStore } from "@/store/login";
+import UseStatusCheck from "@/libs/UseStatusCheck";
+import { ErrorAlert } from "@/utils/Helper";
 
 export const DemoModal = ({ isOpen, onClose, leadId, status }) => {
   const { userData } = useLoginStore((s) => ({ userData: s.userData }));
-  const { control, setValue, handleSubmit, watch } = useForm();
+  const { control, handleSubmit } = useForm();
 
-  const { addMeetingAction, addMeetingStatus, resetStatus } = useMeetingStore(
+  const { addMeetingAction, addMeetingStatus } = useMeetingStore(
     (s) => ({
       addMeetingAction: s.addMeetingAction,
       addMeetingStatus: s.addMeetingStatus,
@@ -41,19 +43,23 @@ export const DemoModal = ({ isOpen, onClose, leadId, status }) => {
     addMeetingAction({
       leadId,
       ...data,
+      leadId,
       isDemo: true,
+      staffId: data.assignedTo,
       assignedTo: data.assignedTo,
       meetingtype: "ONLINE",
     });
   };
-
-  useEffect(() => {
-    if (addMeetingStatus === STATUS.SUCCESS) {
-      // resetStatus();
+  UseStatusCheck({
+    status: addMeetingStatus,
+    onSuccess: () => {
       onClose();
+    },
+    onError: () => {
+      ErrorAlert("Something went wrong")
     }
-  }, [addMeetingStatus, onClose]);
-
+  })
+  
   const { data: teamList, isLoading } = useGetBottomHeirarchy({
     staffId: userData?._id,
   });

@@ -58,6 +58,8 @@ import { CallLogModal } from "./CallLogModal";
 import { CallLogListModal } from "./CallListModal";
 import { DemoListModal } from "./DemoListModal";
 import { DemoModal } from "./DemoModal";
+import {AssignCollaboratorModal} from "./AssignColloboratorModal";
+
 const columnHelper = createColumnHelper();
 
 export const callLogStatus = {
@@ -126,6 +128,13 @@ export const LeadsList = ({ payload }) => {
   } = useDisclosure();
 
   // Add collaborator modal
+  const {
+    isOpen: isAssignColloboratorModal,
+    onOpen: onOpenAssignColloboratorModal,
+    onClose: onCloseAssignColloboratorModal,
+  } = useDisclosure();
+
+  // Add add collaborator modal
   const {
     isOpen: isColloboratorModal,
     onOpen: onOpenColloboratorModal,
@@ -235,7 +244,7 @@ export const LeadsList = ({ payload }) => {
 
   // Handle assign collaborator
   const handleAssignCollaborator = () => {
-    // onOpenColloboratorModal();
+    onOpenAssignColloboratorModal();
   };
 
   UseStatusCheck({
@@ -753,7 +762,7 @@ export const LeadsList = ({ payload }) => {
             size="sm"
             colorScheme="blue"
             ml={5}
-            // onClick={handleAssignCollaborator}
+            onClick={handleAssignCollaborator}
           >
             Assign Collaborator
           </Button>
@@ -1177,6 +1186,14 @@ export const LeadsList = ({ payload }) => {
           isOpen={isOpenDemoModal}
           onClose={onCloseDemoModal}
           leadId={leadsId}
+        />
+      )}
+
+      {isAssignColloboratorModal && (
+        <AssignCollaboratorModal
+          isOpen={onOpenAssignColloboratorModal}
+          onClose={onCloseAssignColloboratorModal}
+          leadIds={selectedRows}
         />
       )}
     </Box>
