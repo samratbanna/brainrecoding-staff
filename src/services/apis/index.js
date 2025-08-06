@@ -1,8 +1,8 @@
 import { create } from "apisauce";
 import { apiMonitor } from "./monitor";
 
-const BASE_URL = "https://testapi.brainrecoding.in/api/r1";
-// const BASE_URL = "http://localhost:4000/api/r1";
+// const BASE_URL = "https://testapi.brainrecoding.in/api/r1";
+const BASE_URL = "http://localhost:4000/api/r1";
 
 export const URIS = {
   LOGIN_USER: "/auth/login",
@@ -25,6 +25,8 @@ export const URIS = {
   ADD_MEETING: "/liveMeeting",
   GET_TEAM: "staff/team",
   TEAM_DASHBOARD: "lead/team-dashboard",
+  BULK_LEAD_ASSIGN: "/lead-assignments/bulk-assign",
+  LEAD_ASSIGNMENT: "/lead-assignments",
   //
   STAFF_TOP_HEIRARCHY: "staff/top-hierarchy",
   STAFF_BOTTOM_HEIRARCHY: "staff/bottom-hierarchy",
