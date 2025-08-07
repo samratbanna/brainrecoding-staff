@@ -30,6 +30,7 @@ export const URIS = {
   //
   STAFF_TOP_HEIRARCHY: "staff/top-hierarchy",
   STAFF_BOTTOM_HEIRARCHY: "staff/bottom-hierarchy",
+  STAFF_INACTIVE: "staff/inactive",
   // task
   TASK: "/tasks",
   ALL_TASK: "/tasks/all",

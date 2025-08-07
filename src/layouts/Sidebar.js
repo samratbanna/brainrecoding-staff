@@ -17,7 +17,7 @@ import {
 
 import { concat, find, map } from "lodash";
 import Link from "next/link";
-import { FaChevronCircleLeft, FaChevronCircleRight, FaChevronDown, FaChild } from "react-icons/fa";
+import { FaChevronCircleLeft, FaChevronCircleRight, FaChevronDown, FaChild, FaUsers } from "react-icons/fa";
 import { CloseIcon } from "@chakra-ui/icons";
 import { MdOutlineSpaceDashboard } from "react-icons/md";
 import { HiOutlineAcademicCap } from "react-icons/hi";
@@ -69,6 +69,11 @@ export const Sidebar = ({ showSidebarMenu, toggleSidebarMenu, showExtraSidear })
           title: "Rewards",
           icon: <FaChild />,
           route: "/rewards",
+        },
+        {
+          title: "My Team",
+          icon: <FaUsers />,
+          route: "/my-team",
         },
       ] :
 

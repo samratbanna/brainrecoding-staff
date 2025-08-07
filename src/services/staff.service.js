@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { URIS, apiClient } from "./apis";
 
 export function useGetTopHeirarchy(payload, enabled) {
@@ -61,16 +61,16 @@ export function useGetBottomHeirarchy(payload, enabled) {
   return { ...rest, isFetched, fetchStatus };
 }
 
-// export function useDeleteState(config) {
-//   return useMutation({
-//     mutationFn: async (payload) => {
-//       const response = await apiClient.delete(URIS.STATE, payload);
-//       if (response.ok) {
-//         return response.data;
-//       }
-//       throw response.data;
-//     },
-//     ...config,
-//   });
-// }
+export function useInActiveStaff(config) {
+  return useMutation({
+    mutationFn: async (payload) => {
+      const response = await apiClient.patch(URIS.STAFF_INACTIVE, payload);
+      if (response.ok) {
+        return response.data;
+      }
+      throw response.data;
+    },
+    ...config,
+  });
+}
 
