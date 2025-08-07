@@ -23,7 +23,7 @@ import { GreetingModal } from "./GreetingModal";
 
 export const Form = () => {
   const { isOpen: isOpenGreetModal, onOpen: onOpenGreetModal, onClose: onCloseGreetModal } = useDisclosure()
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues: {
       ownerName: "",
       schoolName: "",
@@ -35,6 +35,7 @@ export const Form = () => {
       schoolType: "",
       state: "",
       district: "",
+      area: "",
       tehsil: "",
       blockName: "",
       totalStudent: "",
@@ -69,11 +70,30 @@ export const Form = () => {
   }, [getStateAction]);
 
   const selectedState = watch("state");
+  const selectedDistrict = watch("district");
+  const selectedArea = watch("area");
 
-  const district = useMemo(
-    () => find(states, (state) => state.name == selectedState),
+  const selectedStateData = useMemo(
+    () => find(states, (state) => state.name === selectedState),
     [selectedState, states]
   );
+
+  const selectedDistrictData = useMemo(
+    () => find(selectedStateData?.districts, (district) => district.name === selectedDistrict),
+    [selectedDistrict, selectedStateData]
+  );
+
+  const selectedAreaData = useMemo(
+    () => find(selectedDistrictData?.areas, (area) => area.name === selectedArea),
+    [selectedArea, selectedDistrictData]
+  );
+
+  // Auto-fill pincode when area is selected and has pincode
+  useEffect(() => {
+    if (selectedAreaData?.pincode) {
+      setValue("pincode", selectedAreaData.pincode);
+    }
+  }, [selectedAreaData, setValue]);
 
   const onSubmit = (data) => {
     createLeadAction({
@@ -218,7 +238,7 @@ export const Form = () => {
             />
           </FormControl>
           <Flex gap={2} flexDir={{ base: "column", lg: "column", xl: "row" }}>
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel>Mobile</FormLabel>
               <Controller
                 control={control}
@@ -255,7 +275,7 @@ export const Form = () => {
               />
             </FormControl>
           </Flex>
-          <FormControl isRequired>
+          {/* <FormControl isRequired>
             <FormLabel>Phone Number</FormLabel>
             <Controller
               control={control}
@@ -269,7 +289,7 @@ export const Form = () => {
                 />
               )}
             />
-          </FormControl>
+          </FormControl> */}
           <FormControl isRequired>
             <FormLabel>Email</FormLabel>
             <Controller
@@ -376,15 +396,43 @@ export const Form = () => {
                 control={control}
                 name="district"
                 render={({ field }) => (
-                  <Select {...field} size="sm" placeholder="Select District">
-                    {map(district?.cities, (city) => (
-                      <option value={city.name}>{city.name}</option>
+                  <Select 
+                    {...field} 
+                    size="sm" 
+                    placeholder="Select District"
+                    disabled={!selectedState}
+                  >
+                    {map(selectedStateData?.districts, (district) => (
+                      <option key={district.name} value={district.name}>
+                        {district.name}
+                      </option>
                     ))}
                   </Select>
                 )}
               />
             </FormControl>
           </Flex>
+          <FormControl isRequired>
+            <FormLabel>Area</FormLabel>
+            <Controller
+              control={control}
+              name="area"
+              render={({ field }) => (
+                <Select 
+                  {...field} 
+                  size="sm" 
+                  placeholder="Select Area"
+                  disabled={!selectedDistrict}
+                >
+                  {map(selectedDistrictData?.areas, (area) => (
+                    <option key={area._id} value={area.name}>
+                      {area.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            />
+          </FormControl>
           {/* <FormControl isRequired>
             <FormLabel>Tehsil</FormLabel>
             <Controller

@@ -1,7 +1,7 @@
 import {
   AspectRatio,
   Box,
-  Flex,
+  Grid,
   Image,
   Text,
   useDisclosure,
@@ -36,51 +36,56 @@ export const Rewards = () => {
   };
 
   return (
-    <Box bg="white" p={3} minH="100vh">
+    <Box bg="white" p={4} minH="100vh">
       <PageHeading heading="Rewards" />
       <LoadingContainer loading={getLectureStatus === STATUS.FETCHING}>
-        <Box p={3} minH="100vh" mt={4}>
-          <Flex wrap="wrap">
-            {orderBy(lectures, "createdAt", "desc").map((file, index) => {
-              return (
-                <Box
-                  w="220px"
-                  key={index}
-                  m={2}
-                  border="3px solid"
-                  borderColor="gray.50"
-                  borderRadius="10px"
-                  my={3}
-                  mr={3}
-                  onClick={() => handleFullScreenImage(file)}
+        <Grid
+          mt={6}
+          templateColumns={[
+            "repeat(2, 1fr)",
+            "repeat(3, 1fr)",
+            "repeat(4, 1fr)",
+            "repeat(5, 1fr)",
+          ]}
+          gap={6}
+        >
+          {orderBy(lectures, "createdAt", "desc").map((file, index) => (
+            <Box
+              key={index}
+              border="1px solid"
+              borderColor="gray.200"
+              borderRadius="md"
+              overflow="hidden"
+              boxShadow="sm"
+              cursor="pointer"
+              transition="all 0.2s"
+              _hover={{ transform: "scale(1.02)", boxShadow: "md" }}
+              onClick={() => handleFullScreenImage(file)}
+            >
+              <AspectRatio ratio={1}>
+                <Image
+                  src={file.image || "assets/emptyPng.png"}
+                  alt={file.title}
+                  objectFit="cover"
+                  crossOrigin="anonymous"
+                />
+              </AspectRatio>
+              <Box p={2} bg="gray.50">
+                <Text
+                  fontSize="sm"
+                  fontWeight="semibold"
+                  isTruncated
+                  color="gray.600"
                   textAlign="center"
                 >
-                  <AspectRatio ratio={1} key={index}>
-                    <Image
-                      borderRadius="4px 4px 0px 0px"
-                      src={file.image || "assets/emptyPng.png"}
-                      alt="image"
-                      objectFit="cover"
-                      crossOrigin="anonymous"
-                    />
-                  </AspectRatio>
-                  <Text
-                    display="inline-block"
-                    whiteSpace="nowrap"
-                    overflow="hidden"
-                    w="100px"
-                    textOverflow="ellipsis"
-                    fontWeight="semibold"
-                    color="gray.400"
-                  >
-                    {file.title}
-                  </Text>
-                </Box>
-              );
-            })}
-          </Flex>
-        </Box>
+                  {file.title}
+                </Text>
+              </Box>
+            </Box>
+          ))}
+        </Grid>
       </LoadingContainer>
+
       {isOpen && (
         <FullScreenImageModal
           isOpen={isOpen}
