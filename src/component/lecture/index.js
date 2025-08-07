@@ -1,5 +1,6 @@
 import {
   AspectRatio,
+  Badge,
   Box,
   Center,
   Flex,
