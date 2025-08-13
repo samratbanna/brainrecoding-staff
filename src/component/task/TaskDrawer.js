@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -14,25 +14,43 @@ import {
   FormLabel,
   Input,
   Select,
+  Spinner,
 } from "@chakra-ui/react";
 import { Controller, useForm } from "react-hook-form";
 import { ErrorAlert } from "@/utils/Helper";
 import { useAddTask } from "@/services/task.service";
-import { useStaffList } from "@/services/staff.service";
+import {
+  useGetBottomHeirarchy,
+  useGetTopHeirarchy,
+} from "@/services/staff.service";
 import { map } from "lodash";
 
-export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
-  const { control, handleSubmit, reset, setValue, watch } = useForm({
+export const TaskDrawer = ({ isOpen, onClose, task, taskId, userData }) => {
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
-      // manager: "",
     },
   });
 
-  const { data: staffList, isLoading: staffLoading } = useStaffList({
-    isPopulate: true,
-    noPaginate: true,
+  const { data: teamListBottom, isLoading: loadingBottom } = useGetBottomHeirarchy({
+    staffId: userData?._id,
   });
+
+  const { data: teamListTop, isLoading: loadingTop } = useGetTopHeirarchy({
+    staffId: userData?._id,
+  });
+
+  // Merge and deduplicate staff lists
+  const uniqueStaff = useMemo(() => {
+    const combined = [
+      ...(teamListBottom?.docs || []),
+      ...(teamListTop?.docs || []),
+    ];
+    return combined.filter(
+      (staff, index, self) =>
+        index === self.findIndex((s) => s?._id === staff?._id)
+    );
+  }, [teamListBottom, teamListTop]);
 
   const { mutate: addTask, isPending: loading } = useAddTask({
     onSuccess() {
@@ -45,24 +63,12 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
   });
 
   const onSubmit = (data) => {
-    console.log("data", data);
-    
     if (taskId) {
+      // Handle update case if needed
     } else {
       addTask(data);
     }
   };
-
-  // useEffect(() => {
-  //   if (state) {
-  //     const {
-  //       name,
-  //       manager
-  //     } = state || {};
-  //     setValue("name", name);
-  //     setValue("manager", schoolName);
-  //   }
-  // }, [state]);
 
   return (
     <Drawer size={"md"} isOpen={isOpen} placement="right" onClose={onClose}>
@@ -84,6 +90,7 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
                 />
               </FormControl>
             </Flex>
+
             <Flex
               gap={2}
               mt={5}
@@ -104,7 +111,9 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
                 />
               </FormControl>
             </Flex>
+
             <Box className="mt-2"></Box>
+
             <Flex
               gap={2}
               mt={5}
@@ -112,19 +121,23 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
             >
               <FormControl>
                 <FormLabel>Select Staff</FormLabel>
-                <Controller
-                  control={control}
-                  name="assignedTo"
-                  render={({ field }) => (
-                    <Select {...field} placeholder="Select Staff">
-                      {map(staffList?.docs, (s) => (
-                        <option key={`staff:${s?._id}`} value={s?._id}>
-                          {s?.name}
-                        </option>
-                      ))}
-                    </Select>
-                  )}
-                />
+                {loadingBottom || loadingTop ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <Controller
+                    control={control}
+                    name="assignedTo"
+                    render={({ field }) => (
+                      <Select {...field} placeholder="Select Staff">
+                        {map(uniqueStaff, (s) => (
+                          <option key={`staff:${s?._id}`} value={s?._id}>
+                            {s?.name}
+                          </option>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                )}
               </FormControl>
             </Flex>
 
@@ -150,14 +163,16 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
               </FormControl>
             </Flex>
           </DrawerBody>
+
           <Box className="mt-2"></Box>
+
           <DrawerFooter>
             <Button size="sm" mr={3} onClick={onClose}>
               Cancel
             </Button>
             <Button
               loadingText="Loading"
-              isLoading={false}
+              isLoading={loading}
               size="sm"
               colorScheme="defaultColor"
               type="submit"
