@@ -8,7 +8,6 @@ import { useLoginStore } from "../../store/login"
 
 export const Lead = () => {
   const [onlyMyLead, setOnlyMyLead] = useState(false);
-  console.log("onlyMyLead", onlyMyLead);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { userData } = useLoginStore(s => ({
