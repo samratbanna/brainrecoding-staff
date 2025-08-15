@@ -69,6 +69,12 @@ export const callLogStatus = {
   BUSY: "Busy",
 };
 
+const callLogStatusColors2= {
+  ANSWERED: "green.100",
+  INVALID_NUMBER: "yellow.100",
+  NO_ANSWER: "red.100",
+  BUSY: "orange.100",
+};
 export const callLogStatusColors = {
   ANSWERED: "green", // success
   INVALID_NUMBER: "purple", // neutral / invalid
@@ -900,9 +906,11 @@ export const LeadsList = ({ payload }) => {
                           overflow="hidden"
                           textOverflow="ellipsis"
                           fontSize="sm"
+                          bg={callLogStatusColors2[row?.original?.callLog?.callStatus] || "white"}
                         >
                           {callLogStatus[row?.original?.callLog?.callStatus]}
                         </Td>
+
 
                         {/* <Td border="1px solid" borderColor="gray.200">
                           {status.telecallerId ? (
