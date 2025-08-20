@@ -50,9 +50,10 @@ export const TaskList = () => {
   const [state, setState] = useState();
   const [task, setTask] = useState();
   const { onOpen, onClose, isOpen } = useDisclosure();
-  const { teamTask, setTeamTask } = useState(false);
+  const { teamTask, setTeamTask } = useState(true);
   const [params, setParams] = useState({ page, limit, isTeamTask: teamTask });
-
+  console.log("params", teamTask);
+  
   const handleStateDrawer = (state = null) => {
     setState(state);
     onOpen();
@@ -68,7 +69,7 @@ export const TaskList = () => {
     assignedTo: userData?._id,
     page,
     limit,
-    isTeamTask: teamTask,
+    isTeamTask: true,
   });
 
   const { mutate: updateTask, isPending } = useUpdateTask({
@@ -209,28 +210,6 @@ export const TaskList = () => {
               )}
             />
 
-            <Controller
-              name="createdBy"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  placeholder="Select Assigned By"
-                  size="sm"
-                  w="200px"
-                >
-                  {map(
-                    sortBy(staffList?.docs, (t) => t?.name),
-                    (staff) => (
-                      <option key={staff._id} value={staff._id}>
-                        {staff.name}
-                      </option>
-                    )
-                  )}
-                </Select>
-              )}
-            />
-
             <HStack>
               <Button
                 size="sm"
@@ -255,17 +234,7 @@ export const TaskList = () => {
       </Box>
 
       {/* Record Info */}
-      <Text mb={2}>Total Records: {tasks?.totalDocs || 0}</Text>
-      <Flex justify="end" justifyItems={"center"} alignItems={"center"} my={2}>
-        <Switch
-          isChecked={teamTask}
-          onCheckedChange={(e) => {
-            setTeamTask(e.checked);
-          }}
-        >
-          Team Task
-        </Switch>
-      </Flex>
+      <Text mb={2} mt={5}>Total Records: {tasks?.totalDocs || 0}</Text>
       {/* Table */}
       <Box borderRadius="lg" overflow="hidden" boxShadow="sm" bg="white">
         <Table variant="simple">

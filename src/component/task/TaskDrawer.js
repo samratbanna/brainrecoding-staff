@@ -24,8 +24,10 @@ import {
   useGetTopHeirarchy,
 } from "@/services/staff.service";
 import { map } from "lodash";
+import { useLoginStore } from "@/store/login";
 
-export const TaskDrawer = ({ isOpen, onClose, task, taskId, userData }) => {
+export const TaskDrawer = ({ isOpen, onClose, task, taskId }) => {
+  const { userData } = useLoginStore((s) => ({ userData: s.userData }));
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
@@ -40,17 +42,6 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId, userData }) => {
     staffId: userData?._id,
   });
 
-  // Merge and deduplicate staff lists
-  const uniqueStaff = useMemo(() => {
-    const combined = [
-      ...(teamListBottom?.docs || []),
-      ...(teamListTop?.docs || []),
-    ];
-    return combined.filter(
-      (staff, index, self) =>
-        index === self.findIndex((s) => s?._id === staff?._id)
-    );
-  }, [teamListBottom, teamListTop]);
 
   const { mutate: addTask, isPending: loading } = useAddTask({
     onSuccess() {
@@ -129,7 +120,7 @@ export const TaskDrawer = ({ isOpen, onClose, task, taskId, userData }) => {
                     name="assignedTo"
                     render={({ field }) => (
                       <Select {...field} placeholder="Select Staff">
-                        {map(uniqueStaff, (s) => (
+                        {map(teamListBottom, (s) => (
                           <option key={`staff:${s?._id}`} value={s?._id}>
                             {s?.name}
                           </option>
