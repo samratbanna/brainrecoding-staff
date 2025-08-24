@@ -31,7 +31,7 @@ import { STATUS } from "@/constant";
 import { EmptyBox } from "@/common/EmptyBox";
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { FaPlay, FaYoutube } from "react-icons/fa";
-import { FiExternalLink, FiVideo } from "react-icons/fi";
+import { FiExternalLink, FiVideo, FiVideoOff } from "react-icons/fi";
 
 
 const columnHelper = createColumnHelper();
@@ -231,7 +231,7 @@ export const Lecture = () => {
               borderColor="gray.200"
             >
               <VStack spacing={1}>
-                <Icon as={FiVideoOff} boxSize={6} color="gray.400" />
+                <FiVideoOff boxSize={6} color="gray.400" />
                 <Text fontSize="xs" color="gray.500" textAlign="center">
                   No Video
                 </Text>
