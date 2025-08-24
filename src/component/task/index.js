@@ -52,20 +52,18 @@ export const TaskList = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
   const { teamTask, setTeamTask } = useState(true);
   const [params, setParams] = useState({ page, limit, isTeamTask: teamTask });
-  console.log("params", teamTask);
+  console.log("params", params);
   
   const handleStateDrawer = (state = null) => {
     setState(state);
     onOpen();
   };
 
-  const { data: staffList, isLoading } = useStaffList();
-
   const {
     data: tasks,
     isLoading: loading,
     refetch,
-  } = useTaskList({
+  } = useTaskList(params ?? {
     assignedTo: userData?._id,
     page,
     limit,
@@ -82,14 +80,17 @@ export const TaskList = () => {
   });
 
   const { handleSubmit, control, getValues, setValue, watch } = useForm();
+
   const { data: teamList, isLoading: loadingg } = useGetBottomHeirarchy({
     staffId: userData?._id,
   });
+
   useEffect(() => {
     _resetField();
     setParams({ page, limit, isTeamTask: teamTask });
     refetch();
   }, [teamTask]);
+
   const onApply = (data) => {
     let payload = { page: 1, limit, isTeamTask: teamTask };
     if (data?.name) {

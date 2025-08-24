@@ -906,11 +906,17 @@ export const LeadsList = ({ payload }) => {
                           overflow="hidden"
                           textOverflow="ellipsis"
                           fontSize="sm"
-                          bg={callLogStatusColors2[row?.original?.callLog?.callStatus] || "white"}
                         >
-                          {callLogStatus[row?.original?.callLog?.callStatus]}
+                          {row?.original?.callLog?.callStatus ? <Tag size="sm" colorScheme={callLogStatusColors[row?.original?.callLog?.callStatus]} mt={1}>
+                              <TagLabel>
+                                {
+                                  callLogStatus[
+                                    row?.original?.callLog?.callStatus
+                                  ]
+                                }
+                              </TagLabel>
+                          </Tag> : null}
                         </Td>
-
 
                         {/* <Td border="1px solid" borderColor="gray.200">
                           {status.telecallerId ? (
