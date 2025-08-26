@@ -36,6 +36,10 @@ export const URIS = {
   ALL_TASK: "/tasks/all",
   CALL_LOGS: "/CallLogs",
   ALL_CALL_LOGS: "/CallLogs/all",
+
+  GET_STATE_LIST: 'state/states-list',
+  GET_DISTRICT_LIST: 'state/districts-list',
+  GET_AREA_LIST: 'state/areas-list',
 };
 
 let api = create({
