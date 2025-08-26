@@ -12,14 +12,15 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
-import { useStateStore } from "@/store/states";
 import { useLeadStore } from "@/store/lead";
 import { find, map } from "lodash";
 import { LEAD_ADDED_BY_TYPE, STATUS } from "@/constant";
 import { GreetingModal } from "./GreetingModal";
+import { useGetAreas, useGetDistricts, useGetStates } from "@/services/state.service";
+
 
 export const Form = () => {
   const { isOpen: isOpenGreetModal, onOpen: onOpenGreetModal, onClose: onCloseGreetModal } = useDisclosure()
@@ -45,11 +46,6 @@ export const Form = () => {
       message: "",
     },
   });
-  
-  const { getStateAction, states } = useStateStore((s) => ({
-    getStateAction: s.getStateAction,
-    states: s.states,
-  }));
 
   const searchParams = useSearchParams();
   const sellerId = searchParams.get("id");
@@ -63,30 +59,70 @@ export const Form = () => {
     })
   );
 
-  useEffect(() => {
-    if (!states) {
-      getStateAction();
-    }
-  }, [getStateAction]);
-
   const selectedState = watch("state");
   const selectedDistrict = watch("district");
   const selectedArea = watch("area");
 
+  // Fetch states
+  const { 
+    data: states = [], 
+    isLoading: isLoadingStates 
+  } = useGetStates();
+
+  // Find selected state data
   const selectedStateData = useMemo(
     () => find(states, (state) => state.name === selectedState),
     [selectedState, states]
   );
 
-  const selectedDistrictData = useMemo(
-    () => find(selectedStateData?.districts, (district) => district.name === selectedDistrict),
-    [selectedDistrict, selectedStateData]
+  // Fetch districts when state is selected
+  const { 
+    data: districts = [], 
+    isLoading: isLoadingDistricts 
+  } = useGetDistricts(
+    selectedStateData?.id || selectedStateData?._id,
+    !!(selectedStateData?.id || selectedStateData?._id)
   );
 
-  const selectedAreaData = useMemo(
-    () => find(selectedDistrictData?.areas, (area) => area.name === selectedArea),
-    [selectedArea, selectedDistrictData]
+  // Find selected district data
+  const selectedDistrictData = useMemo(
+    () => find(districts, (district) => district.name === selectedDistrict),
+    [selectedDistrict, districts]
   );
+
+  // Fetch areas when district is selected
+  const { 
+    data: areas = [], 
+    isLoading: isLoadingAreas 
+  } = useGetAreas(
+    selectedStateData?.id || selectedStateData?._id,
+    selectedDistrictData?.id || selectedDistrictData?._id,
+    !!(selectedStateData?.id || selectedStateData?._id) && 
+    !!(selectedDistrictData?.id || selectedDistrictData?._id)
+  );
+
+  // Find selected area data
+  const selectedAreaData = useMemo(
+    () => find(areas, (area) => area.name === selectedArea),
+    [selectedArea, areas]
+  );
+
+  // Reset dependent fields when state changes
+  useEffect(() => {
+    if (selectedState) {
+      setValue("district", "");
+      setValue("area", "");
+      setValue("pincode", "");
+    }
+  }, [selectedState, setValue]);
+
+  // Reset area field when district changes
+  useEffect(() => {
+    if (selectedDistrict) {
+      setValue("area", "");
+      setValue("pincode", "");
+    }
+  }, [selectedDistrict, setValue]);
 
   // Auto-fill pincode when area is selected and has pincode
   useEffect(() => {
@@ -110,7 +146,7 @@ export const Form = () => {
       reset();
       resetStatus();
     }
-  }, [createLeadStatus, reset, createLeadStatus, onOpenGreetModal]);
+  }, [createLeadStatus, reset, resetStatus, onOpenGreetModal]);
 
   const roleCss = {
     p: 1,
@@ -148,36 +184,7 @@ export const Form = () => {
             Application Form
           </Heading>
           <HStack w={"100%"} mt={1} justify="center">
-            {/* <Center
-              w={{ lg: "50%", base: "100%" }}
-              {...roleCss}
-              onClick={() => setModel("FRANCHISE")}
-              color={model == "FRANCHISE" ? "defaultColor.600" : "black"}
-              borderColor={
-                model == "FRANCHISE" ? "defaultColor.600" : "gray.200"
-              }
-            >
-              <Text
-                color={model == "FRANCHISE" ? "defaultColor.600" : "gray.500"}
-              >
-                FRANCHISE MODEL
-              </Text>
-            </Center> */}
-            {/* <Center
-              w={{ lg: "50%", base: "100%" }}
-              {...roleCss}
-              onClick={() => setModel("PARTNERSHIP")}
-              color={model == "PARTNERSHIP" ? "defaultColor.600" : "black"}
-              borderColor={
-                model == "PARTNERSHIP" ? "defaultColor.600" : "gray.200"
-              }
-            >
-              <Text
-                color={model == "PARTNERSHIP" ? "defaultColor.600" : "gray.500"}
-              >
-                PARTNERSHIP MODEL
-              </Text>
-            </Center> */}
+            {/* Model selection commented out as in original */}
           </HStack>
           <FormControl isRequired mt={2}>
             <FormLabel>Name</FormLabel>
@@ -189,20 +196,6 @@ export const Form = () => {
               )}
             />
           </FormControl>
-          {/* <FormControl isRequired>
-            <FormLabel>About Yourself</FormLabel>
-            <Controller
-              control={control}
-              name="aboutYou"
-              render={({ field }) => (
-                <Textarea
-                  {...field}
-                  size="sm"
-                  placeholder="Enter About Yourself"
-                />
-              )}
-            />
-          </FormControl> */}
           <FormControl isRequired>
             <FormLabel>About Yourself</FormLabel>
             <Controller
@@ -275,21 +268,6 @@ export const Form = () => {
               />
             </FormControl>
           </Flex>
-          {/* <FormControl isRequired>
-            <FormLabel>Phone Number</FormLabel>
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  size="sm"
-                  placeholder="Phone Number"
-                  type="phone"
-                />
-              )}
-            />
-          </FormControl> */}
           <FormControl isRequired>
             <FormLabel>Email</FormLabel>
             <Controller
@@ -307,72 +285,6 @@ export const Form = () => {
             />
           </FormControl>
 
-          {/* <Flex gap={2} flexDir={{ base: "column", lg: "column", xl: "row" }}>
-            <FormControl>
-              <FormLabel>Medium</FormLabel>
-              <Controller
-                control={control}
-                name="schoolMedium"
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    size="sm"
-                    placeholder="Select School Medium"
-                  >
-                    <option value="ENGLISH">English</option>
-                    <option value="HINDI">Hindi</option>
-                    <option value="OTHER">Other</option>
-                  </Select>
-                )}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>School Type</FormLabel>
-              <Controller
-                control={control}
-                name="schoolType"
-                render={({ field }) => (
-                  <Select {...field} size="sm" placeholder="Select School Type">
-                    <option value="CBSE">CBSE</option>
-                    <option value="RBSE">RBSE</option>
-                    <option value="OTHER">Other</option>
-                  </Select>
-                )}
-              />
-            </FormControl>
-          </Flex>
-          <Flex gap={2} flexDir={{ base: "column", lg: "column", xl: "row" }}>
-            <FormControl>
-              <FormLabel>Total Students in School</FormLabel>
-              <Controller
-                control={control}
-                name="totalStudent"
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    size="sm"
-                    placeholder="No. of Students in School"
-                    type="number"
-                  />
-                )}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Fee of fifth class</FormLabel>
-              <Controller
-                control={control}
-                name="fees"
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    size="sm"
-                    placeholder="Fee of fifth class"
-                    type="number"
-                  />
-                )}
-              />
-            </FormControl>
-          </Flex> */}
           <Flex gap={2} flexDir={{ base: "column", lg: "column", xl: "row" }}>
             <FormControl isRequired>
               <FormLabel>State</FormLabel>
@@ -380,9 +292,14 @@ export const Form = () => {
                 control={control}
                 name="state"
                 render={({ field }) => (
-                  <Select {...field} size="sm" placeholder="Select State">
+                  <Select 
+                    {...field} 
+                    size="sm" 
+                    placeholder={isLoadingStates ? "Loading states..." : "Select State"}
+                    disabled={isLoadingStates}
+                  >
                     {map(states, (state) => (
-                      <option key={state.name} value={state.name}>
+                      <option key={state.name || state.id} value={state.name}>
                         {state.name}
                       </option>
                     ))}
@@ -399,11 +316,17 @@ export const Form = () => {
                   <Select 
                     {...field} 
                     size="sm" 
-                    placeholder="Select District"
-                    disabled={!selectedState}
+                    placeholder={
+                      isLoadingDistricts 
+                        ? "Loading districts..." 
+                        : !selectedState 
+                        ? "Select State first"
+                        : "Select District"
+                    }
+                    disabled={!selectedState || isLoadingDistricts}
                   >
-                    {map(selectedStateData?.districts, (district) => (
-                      <option key={district.name} value={district.name}>
+                    {map(districts, (district) => (
+                      <option key={district.name || district.id} value={district.name}>
                         {district.name}
                       </option>
                     ))}
@@ -421,11 +344,17 @@ export const Form = () => {
                 <Select 
                   {...field} 
                   size="sm" 
-                  placeholder="Select Area"
-                  disabled={!selectedDistrict}
+                  placeholder={
+                    isLoadingAreas
+                      ? "Loading areas..."
+                      : !selectedDistrict
+                      ? "Select District first"
+                      : "Select Area"
+                  }
+                  disabled={!selectedDistrict || isLoadingAreas}
                 >
-                  {map(selectedDistrictData?.areas, (area) => (
-                    <option key={area._id} value={area.name}>
+                  {map(areas, (area) => (
+                    <option key={area._id || area.id} value={area.name}>
                       {area.name}
                     </option>
                   ))}
@@ -433,16 +362,6 @@ export const Form = () => {
               )}
             />
           </FormControl>
-          {/* <FormControl isRequired>
-            <FormLabel>Tehsil</FormLabel>
-            <Controller
-              control={control}
-              name="tehsil"
-              render={({ field }) => (
-                <Input {...field} size="sm" placeholder="Enter Tehsil Name" />
-              )}
-            />
-          </FormControl> */}
           <FormControl>
             <FormLabel>PinCode</FormLabel>
             <Controller
@@ -461,16 +380,6 @@ export const Form = () => {
               )}
             />
           </FormControl>
-          {/* <FormControl isRequired>
-            <FormLabel>Block</FormLabel>
-            <Controller
-              control={control}
-              name="blockName"
-              render={({ field }) => (
-                <Input {...field} size="sm" placeholder="Enter Block Name" />
-              )}
-            />
-          </FormControl> */}
           <FormControl>
             <FormLabel>Address</FormLabel>
             <Controller
