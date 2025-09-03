@@ -374,6 +374,7 @@ export const Form = () => {
                   placeholder="Enter 6 digit Pincode"
                   pattern="{0-9}[6]"
                   type="tel"
+                  disabled
                   maxLength={6}
                   minLength={6}
                 />

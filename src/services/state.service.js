@@ -27,7 +27,10 @@ export function useGetDistricts(stateId, enabled = true) {
   const { isFetched, fetchStatus, ...rest } = useQuery({
     queryKey: ["districts", "byState", stateId],
     queryFn: async () => {
-      const res = await apiClient.get(URIS.GET_DISTRICT_LIST, { stateId });
+      const res = await apiClient.get(URIS.GET_DISTRICT_LIST, {
+        stateId,
+        noPaginate: true,
+      });
       if (res.ok) {
         return res.data;
       } else {
@@ -48,7 +51,11 @@ export function useGetAreas(stateId, districtId, enabled = true) {
   const { isFetched, fetchStatus, ...rest } = useQuery({
     queryKey: ["areas", "byDistrict", stateId, districtId],
     queryFn: async () => {
-      const res = await apiClient.get(URIS.GET_AREA_LIST, { stateId, districtId });
+      const res = await apiClient.get(URIS.GET_AREA_LIST, {
+        stateId,
+        districtId,
+        noPaginate: true,
+      });
       if (res.ok) {
         return res.data;
       } else {

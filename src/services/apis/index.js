@@ -1,7 +1,8 @@
 import { create } from "apisauce";
 import { apiMonitor } from "./monitor";
 
-const BASE_URL = "https://testapi.brainrecoding.in/api/r1";
+const BASE_URL = "https://api.brainrecoding.in/api/r1";
+// const BASE_URL = "https://testapi.brainrecoding.in/api/r1";
 // const BASE_URL = "http://localhost:4000/api/r1";
 
 export const URIS = {
@@ -37,9 +38,9 @@ export const URIS = {
   CALL_LOGS: "/CallLogs",
   ALL_CALL_LOGS: "/CallLogs/all",
 
-  GET_STATE_LIST: 'state/states-list',
-  GET_DISTRICT_LIST: 'state/districts-list',
-  GET_AREA_LIST: 'state/areas-list',
+  GET_STATE_LIST: 'state/all',
+  GET_DISTRICT_LIST: 'district/all',
+  GET_AREA_LIST: 'area/all',
 };
 
 let api = create({
