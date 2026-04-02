@@ -19,11 +19,18 @@ import { useLeadStore } from "@/store/lead";
 import { find, map } from "lodash";
 import { LEAD_ADDED_BY_TYPE, STATUS } from "@/constant";
 import { GreetingModal } from "./GreetingModal";
-import { useGetAreas, useGetDistricts, useGetStates } from "@/services/state.service";
-
+import {
+  useGetAreas,
+  useGetDistricts,
+  useGetStates,
+} from "@/services/state.service";
 
 export const Form = () => {
-  const { isOpen: isOpenGreetModal, onOpen: onOpenGreetModal, onClose: onCloseGreetModal } = useDisclosure()
+  const {
+    isOpen: isOpenGreetModal,
+    onOpen: onOpenGreetModal,
+    onClose: onCloseGreetModal,
+  } = useDisclosure();
   const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues: {
       ownerName: "",
@@ -42,7 +49,7 @@ export const Form = () => {
       totalStudent: "",
       fees: "",
       pincode: "",
-      aboutYou: "", 
+      aboutYou: "",
       message: "",
     },
   });
@@ -50,7 +57,7 @@ export const Form = () => {
   const searchParams = useSearchParams();
   const sellerId = searchParams.get("id");
   const leadType = searchParams.get("type");
-  
+
   const { createLeadStatus, createLeadAction, resetStatus } = useLeadStore(
     (s) => ({
       createLeadStatus: s.createLeadStatus,
@@ -64,10 +71,7 @@ export const Form = () => {
   const selectedArea = watch("area");
 
   // Fetch states
-  const { 
-    data: states = [], 
-    isLoading: isLoadingStates 
-  } = useGetStates();
+  const { data: states = [], isLoading: isLoadingStates } = useGetStates();
 
   // Find selected state data
   const selectedStateData = useMemo(
@@ -76,13 +80,11 @@ export const Form = () => {
   );
 
   // Fetch districts when state is selected
-  const { 
-    data: districts = [], 
-    isLoading: isLoadingDistricts 
-  } = useGetDistricts(
-    selectedStateData?.id || selectedStateData?._id,
-    !!(selectedStateData?.id || selectedStateData?._id)
-  );
+  const { data: districts = [], isLoading: isLoadingDistricts } =
+    useGetDistricts(
+      selectedStateData?.id || selectedStateData?._id,
+      !!(selectedStateData?.id || selectedStateData?._id)
+    );
 
   // Find selected district data
   const selectedDistrictData = useMemo(
@@ -91,14 +93,11 @@ export const Form = () => {
   );
 
   // Fetch areas when district is selected
-  const { 
-    data: areas = [], 
-    isLoading: isLoadingAreas 
-  } = useGetAreas(
+  const { data: areas = [], isLoading: isLoadingAreas } = useGetAreas(
     selectedStateData?.id || selectedStateData?._id,
     selectedDistrictData?.id || selectedDistrictData?._id,
-    !!(selectedStateData?.id || selectedStateData?._id) && 
-    !!(selectedDistrictData?.id || selectedDistrictData?._id)
+    !!(selectedStateData?.id || selectedStateData?._id) &&
+      !!(selectedDistrictData?.id || selectedDistrictData?._id)
   );
 
   // Find selected area data
@@ -132,17 +131,28 @@ export const Form = () => {
   }, [selectedAreaData, setValue]);
 
   const onSubmit = (data) => {
-    createLeadAction({
+    let params = {
       ...data,
       isActive: true,
-      leadType: leadType === "FRANCHISE" ? "FRANCHISE" : "BRAIN", 
-      staffId: sellerId,
-    });
+      leadType: leadType === "FRANCHISE" ? "FRANCHISE" : "BRAIN",
+    };
+    if (leadType === "REFER") {
+      params = {
+        ...params,
+        referId: sellerId,
+      };
+    } else {
+      params = {
+        ...params,
+        staffId: sellerId,
+      };
+    }
+    createLeadAction(params);
   };
 
   useEffect(() => {
     if (createLeadStatus === STATUS.SUCCESS) {
-      onOpenGreetModal()
+      onOpenGreetModal();
       reset();
       resetStatus();
     }
@@ -292,10 +302,12 @@ export const Form = () => {
                 control={control}
                 name="state"
                 render={({ field }) => (
-                  <Select 
-                    {...field} 
-                    size="sm" 
-                    placeholder={isLoadingStates ? "Loading states..." : "Select State"}
+                  <Select
+                    {...field}
+                    size="sm"
+                    placeholder={
+                      isLoadingStates ? "Loading states..." : "Select State"
+                    }
                     disabled={isLoadingStates}
                   >
                     {map(states, (state) => (
@@ -313,20 +325,23 @@ export const Form = () => {
                 control={control}
                 name="district"
                 render={({ field }) => (
-                  <Select 
-                    {...field} 
-                    size="sm" 
+                  <Select
+                    {...field}
+                    size="sm"
                     placeholder={
-                      isLoadingDistricts 
-                        ? "Loading districts..." 
-                        : !selectedState 
+                      isLoadingDistricts
+                        ? "Loading districts..."
+                        : !selectedState
                         ? "Select State first"
                         : "Select District"
                     }
                     disabled={!selectedState || isLoadingDistricts}
                   >
                     {map(districts, (district) => (
-                      <option key={district.name || district.id} value={district.name}>
+                      <option
+                        key={district.name || district.id}
+                        value={district.name}
+                      >
                         {district.name}
                       </option>
                     ))}
@@ -341,9 +356,9 @@ export const Form = () => {
               control={control}
               name="area"
               render={({ field }) => (
-                <Select 
-                  {...field} 
-                  size="sm" 
+                <Select
+                  {...field}
+                  size="sm"
                   placeholder={
                     isLoadingAreas
                       ? "Loading areas..."
