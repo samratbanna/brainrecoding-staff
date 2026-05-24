@@ -50,9 +50,9 @@ export const TaskList = () => {
   const [state, setState] = useState();
   const [task, setTask] = useState();
   const { onOpen, onClose, isOpen } = useDisclosure();
-  const { teamTask, setTeamTask } = useState(true);
-  const [params, setParams] = useState({ page, limit, isTeamTask: teamTask });
-  
+  const [teamTask, setTeamTask] = useState(true);
+  const [params, setParams] = useState({ page: 1, limit, isTeamTask: true, assignedTo: userData?._id });
+    console.log("userData", userData);
   const handleStateDrawer = (state = null) => {
     setState(state);
     onOpen();
@@ -62,12 +62,7 @@ export const TaskList = () => {
     data: tasks,
     isLoading: loading,
     refetch,
-  } = useTaskList(params ?? {
-    assignedTo: userData?._id,
-    page,
-    limit,
-    isTeamTask: true,
-  });
+  } = useTaskList(params);
 
   const { mutate: updateTask, isPending } = useUpdateTask({
     onSuccess() {
@@ -85,13 +80,26 @@ export const TaskList = () => {
   });
 
   useEffect(() => {
+    setParams((prev) => ({ ...prev, page }));
+  }, [page]);
+
+  useEffect(() => {
+    setParams((prev) => ({ ...prev, limit, page: 1 }));
+    setPage(1);
+  }, [limit]);
+
+  useEffect(() => {
     _resetField();
-    setParams({ page, limit, isTeamTask: teamTask });
-    refetch();
+    setParams({ page: 1, limit, isTeamTask: teamTask, assignedTo: userData?._id });
   }, [teamTask]);
 
   const onApply = (data) => {
-    let payload = { page: 1, limit, isTeamTask: teamTask };
+    let payload = {
+      page: 1,
+      limit,
+      isTeamTask: teamTask,
+      assignedTo: userData?._id,
+    };
     if (data?.name) {
       payload = { ...payload, name: data?.name };
     }
@@ -305,7 +313,7 @@ export const TaskList = () => {
         </Select>
         <HStack>
           <IconButton
-            disabled={page === 1}
+            isDisabled={page === 1}
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             icon={<ChevronLeftIcon />}
             aria-label="Prev"
@@ -314,7 +322,7 @@ export const TaskList = () => {
           />
           <Text>{`${page} out of ${tasks?.totalPages}`}</Text>
           <IconButton
-            disabled={page == tasks?.totalPages}
+            isDisabled={page >= tasks?.totalPages}
             onClick={() => setPage((prev) => prev + 1)}
             icon={<ChevronRightIcon />}
             aria-label="Next"
