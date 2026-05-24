@@ -52,7 +52,6 @@ export const TaskList = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
   const { teamTask, setTeamTask } = useState(true);
   const [params, setParams] = useState({ page, limit, isTeamTask: teamTask });
-  console.log("params", params);
   
   const handleStateDrawer = (state = null) => {
     setState(state);
