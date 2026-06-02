@@ -226,7 +226,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </Text>
                 </HStack>
               ) : null}
-              <HStack spacing={1} color="gray.500">
+              {/* <HStack spacing={1} color="gray.500">
                 <Icon as={FiCalendar} boxSize={3} />
                 <Text fontSize="10px" fontWeight={650}>
                   Joined On:{" "}
@@ -243,7 +243,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     {memberInfo.teamSize} Members
                   </Text>
                 </Text>
-              </HStack>
+              </HStack> */}
             </HStack>
           </Box>
         </Flex>
