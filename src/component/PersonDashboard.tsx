@@ -135,7 +135,7 @@ export const PersonXRayDashboard: React.FC = () => {
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
           pagebreak: { mode: "avoid-all" },
-        })
+        } as any)
         .from(element)
         .save();
     } finally {
