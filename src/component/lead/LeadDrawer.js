@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { find, join, map } from "lodash";
 import { useEffect, useState } from "react";
-import { useLeadStore } from "../../store/lead";
+import { useLeadStore } from "@/store/lead";
 import dayjs from "dayjs";
 
 export const LeadDrawer = ({ isOpen, onClose, leadsId }) => {
@@ -26,7 +26,7 @@ export const LeadDrawer = ({ isOpen, onClose, leadsId }) => {
 
   useEffect(() => {
     if (leadsDetails) {
-      setStaffLead(find(leadsDetails.docs, (lead) => lead?._id === leadsId));
+      setStaffLead(find(leadsDetails.docs, (lead) => lead._id === leadsId));
     }
   }, [leadsDetails, leadsId]);
 
@@ -63,6 +63,7 @@ export const LeadDrawer = ({ isOpen, onClose, leadsId }) => {
             <DataValue title="About You" value={aboutYou} />
             <DataValue title="message" value={message} />
             <DataValue title="Lead Source" value={leadSource} />
+            <DataValue title="Remark" value={staffLead?.remark} />
             <DataValue title="Email" value={email} />
             <DataValue title="Total Student" value={totalStudent} />
             <DataValue title="5th Class Fees" value={staffLead?.fees} />
@@ -84,12 +85,13 @@ export const LeadDrawer = ({ isOpen, onClose, leadsId }) => {
                   tehsil,
                   staffLead?.pincode,
                 ],
-                ", "
+                ", ",
               )}
             />
-            {map(customFields, (field) => (
+            {/* <WhatsAppFlowSection leadId={staffLead?._id} /> */}
+            {/* {map(customFields, (field) => (
               <DataValue key={field.id} title={field.key} value={field.value} />
-            ))}
+            ))} */}
           </LoadingContainer>
         </DrawerBody>
       </DrawerContent>

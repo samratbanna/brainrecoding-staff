@@ -59,6 +59,7 @@ import { CallLogListModal } from "./CallListModal";
 import { DemoListModal } from "./DemoListModal";
 import { DemoModal } from "./DemoModal";
 import {AssignCollaboratorModal} from "./AssignColloboratorModal";
+import { useGetBottomHeirarchy } from "@/services/staff.service";
 
 const columnHelper = createColumnHelper();
 
@@ -69,12 +70,6 @@ export const callLogStatus = {
   BUSY: "Busy",
 };
 
-const callLogStatusColors2= {
-  ANSWERED: "green.100",
-  INVALID_NUMBER: "yellow.100",
-  NO_ANSWER: "red.100",
-  BUSY: "orange.100",
-};
 export const callLogStatusColors = {
   ANSWERED: "green", // success
   INVALID_NUMBER: "purple", // neutral / invalid
@@ -93,7 +88,7 @@ export const LeadsList = ({ payload }) => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedLeads, setSelectedLeads] = useState([]);
   
-  const { handleSubmit, control, getValues, setValue, watch, onChange } = useForm();
+  const { handleSubmit, control, getValues, setValue, watch } = useForm();
 
   const range = watch('rangeDate');
 
@@ -195,7 +190,7 @@ export const LeadsList = ({ payload }) => {
     resetStatus: s.resetStatus,
   }));
 
-  const { addCallLogAction, addCallLogStatus } = useLeadStore((s) => ({
+  const { addCallLogStatus } = useLeadStore((s) => ({
     addCallLogAction: s.addCallLogAction,
     addCallLogStatus: s.addCallLogStatus,
     resetStatus: s.resetStatus,
@@ -510,8 +505,10 @@ export const LeadsList = ({ payload }) => {
 
   const selectedState = watch("stateName");
   const teamLeaderId = watch('districtManagerId');
-  const trainerId = watch('trainerId');
-  const { getTeam, teamStatus, teamList, getTeamDashboard, teamReportStatus, teamDashboard } = useLeadStore();
+  const { getTeam, teamList } = useLeadStore();
+
+  const { data: bottomHierarchy, isLoading } = useGetBottomHeirarchy({ staffId: userData?._id });
+  console.log("bottomHierarchy", bottomHierarchy);
   
   useEffect(() => {
     getTeam();
@@ -543,10 +540,6 @@ export const LeadsList = ({ payload }) => {
     }
   }, [teamLeaderId]);
 
-  const districtData = useMemo(
-    () => find(states, (state) => state.name == selectedState),
-    [selectedState, states]
-  );
 
   const handleViewCollaborator = (id = null) => {
     onOpenColloboratorModal();
@@ -619,7 +612,7 @@ export const LeadsList = ({ payload }) => {
                       size="sm"
                       w="200px"
                     >
-                      {map(teamLeader, (staff) => (
+                      {map(bottomHierarchy, (staff) => (
                         <option key={staff._id} value={staff._id}>
                           {staff.name}
                         </option>
@@ -638,7 +631,7 @@ export const LeadsList = ({ payload }) => {
                     size="sm"
                     w="200px"
                   >
-                    {map(trainers, (staff) => (
+                    {map(bottomHierarchy, (staff) => (
                       <option key={staff._id} value={staff._id}>
                         {staff.name}
                       </option>
@@ -816,7 +809,7 @@ export const LeadsList = ({ payload }) => {
                         {!header.isPlaceholder &&
                           flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                       </Th>
                     ))}
@@ -843,7 +836,7 @@ export const LeadsList = ({ payload }) => {
                   table.getRowModel().rows.map((row) => {
                     const status = find(
                       leadsDetails.docs,
-                      (lead) => lead._id === row.original._id
+                      (lead) => lead._id === row.original._id,
                     );
 
                     return (
@@ -869,7 +862,7 @@ export const LeadsList = ({ payload }) => {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </Td>
                         ))}
@@ -907,7 +900,16 @@ export const LeadsList = ({ payload }) => {
                           textOverflow="ellipsis"
                           fontSize="sm"
                         >
-                          {row?.original?.callLog?.callStatus ? <Tag size="sm" colorScheme={callLogStatusColors[row?.original?.callLog?.callStatus]} mt={1}>
+                          {row?.original?.callLog?.callStatus ? (
+                            <Tag
+                              size="sm"
+                              colorScheme={
+                                callLogStatusColors[
+                                  row?.original?.callLog?.callStatus
+                                ]
+                              }
+                              mt={1}
+                            >
                               <TagLabel>
                                 {
                                   callLogStatus[
@@ -915,7 +917,8 @@ export const LeadsList = ({ payload }) => {
                                   ]
                                 }
                               </TagLabel>
-                          </Tag> : null}
+                            </Tag>
+                          ) : null}
                         </Td>
 
                         {/* <Td border="1px solid" borderColor="gray.200">
@@ -964,7 +967,7 @@ export const LeadsList = ({ payload }) => {
                                 handleStatus(
                                   e.target.value,
                                   row.original?._id,
-                                  status
+                                  status,
                                 )
                               }
                               fontSize="sm"
@@ -1013,12 +1016,12 @@ export const LeadsList = ({ payload }) => {
                                   if (status.status === "MEETING_SCHEDULED") {
                                     handleMeetingModal(
                                       row.original?._id,
-                                      status
+                                      status,
                                     );
                                   } else {
                                     handleTimelineModal(
                                       row.original?._id,
-                                      status
+                                      status,
                                     );
                                   }
                                 }}
@@ -1216,10 +1219,6 @@ export const LeadsList = ({ payload }) => {
 
 export const LeadTable = () => {
   const { userData } = useLoginStore((s) => ({ userData: s.userData }));
-  const isTeleCaller = useMemo(
-    () => (userData && userData.role === "CALLER" ? true : false),
-    [userData]
-  );
   const LEADTABS = ["All", "Bucket", "Follow-ups", "Meetings", "Conversions"];
 
   return (

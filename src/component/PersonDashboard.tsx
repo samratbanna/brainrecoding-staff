@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   Box,
   Grid,
@@ -36,6 +36,7 @@ import { RecentLeadTimelineCard } from "./person-dashboard/RecentLeadTimelineCar
 
 // Import services and custom hooks
 import { useLoginStore } from "@/store/login";
+import { useGetBottomHeirarchy, useGetRoles } from "@/services/staff.service";
 import {
   useGetEmployeePerformance,
   useGetEmployeePerformanceMix,
@@ -47,6 +48,7 @@ import {
 
 // Role mapping helper
 const getApiRole = (roleItem: any): string => {
+  console.log("roleItem", roleItem);
   const roleName = typeof roleItem === "object" ? roleItem?.name : roleItem;
   if (roleName === "TRAINER") return "trainer";
   if (roleName === "TEAM_LEADER") return "teamLeader";
@@ -58,8 +60,28 @@ export const PersonXRayDashboard: React.FC = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const { userData } = useLoginStore((s: any) => ({ userData: s.userData }));
 
-  const userId = userData?._id || "";
-  const role = getApiRole(userData?.role);
+  // Fetch direct + indirect reports for the logged-in staff
+  const { data: hierarchyData } = useGetBottomHeirarchy(
+    { staffId: userData?._id },
+    !!userData?._id,
+  );
+  const { data: rolesData } = useGetRoles();
+  
+  const hierarchyList: any[] = hierarchyData || [];
+  const hasSubordinates = hierarchyList.length > 0;
+
+  // Selected staff from dropdown; null = viewing own dashboard
+  const [selectedStaff, setSelectedStaff] = useState<any>(null);
+
+  const activeStaff = useMemo(() => selectedStaff || userData, [selectedStaff, userData]);
+  const userId = useMemo(() => activeStaff?._id || "", [activeStaff]);
+  const role = useMemo(() => {
+    if (typeof activeStaff?.role === "string") {
+      const findRole = rolesData?.find((r: any) => r._id === activeStaff.role);
+      return getApiRole(findRole || activeStaff?.role);
+    }
+    return getApiRole(activeStaff?.role);
+  }, [activeStaff, rolesData]);
 
   // Theme colors passed down to child components
   const bg = useColorModeValue("#F8F9FB", "gray.900");
@@ -86,7 +108,7 @@ export const PersonXRayDashboard: React.FC = () => {
   const handleExportReport = async () => {
     if (!dashboardRef.current) return;
     const html2pdf = (await import("html2pdf.js")).default;
-    const name = userData?.name || "person";
+    const name = activeStaff?.name || "person";
 
     // Switch KPI row to wrapping grid and wait for React to paint
     setIsPrinting(true);
@@ -279,13 +301,13 @@ export const PersonXRayDashboard: React.FC = () => {
 
   // 1. Profile Header Member Info
   const memberInfo = {
-    name: userData?.name || "Unknown Staff",
-    role: userData?.role?.name || role,
-    avatarUrl: userData?.avatarUrl || "https://bit.ly/prosper-baba",
-    reportingTo: userData?.managerId?.name ? `${userData.managerId.name}` : "",
-    joinedOn: userData?.createdAt ? dayjs(userData.createdAt).format("MMM DD, YYYY") : "",
+    name: activeStaff?.name || "Unknown Staff",
+    role: activeStaff?.role?.name || role,
+    avatarUrl: activeStaff?.avatarUrl || "https://bit.ly/prosper-baba",
+    reportingTo: activeStaff?.managerId?.name ? `${activeStaff.managerId.name}` : "",
+    joinedOn: activeStaff?.createdAt ? dayjs(activeStaff.createdAt).format("MMM DD, YYYY") : "",
     teamSize: 0,
-    status: userData?.status || "Active",
+    status: activeStaff?.status || "Active",
   };
 
   const dateRangeLabel = `${dayjs(startDate).format("MMM DD")} - ${dayjs(endDate).format("MMM DD")}, ${dayjs(endDate).format("YYYY")}`;
@@ -540,9 +562,14 @@ export const PersonXRayDashboard: React.FC = () => {
         memberInfo={memberInfo}
         score={overallScore}
         scoreLabel={overallLabel}
-        // score={performanceData?.score ?? 0}
-        // scoreLabel={scorecardData?.overall?.grade ?? "-"}
         dateRangeLabel={dateRangeLabel}
+        staffList={hasSubordinates ? hierarchyList : []}
+        selectedStaffId={selectedStaff?._id || ""}
+        onStaffChange={(opt: any) => {
+          if (!opt) { setSelectedStaff(null); return; }
+          const found = hierarchyList.find((s: any) => s._id === opt.value);
+          setSelectedStaff(found || null);
+        }}
         startDate={startDate}
         endDate={endDate}
         onDateChange={handleDateChange}

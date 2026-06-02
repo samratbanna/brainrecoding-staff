@@ -61,6 +61,25 @@ export function useGetBottomHeirarchy(payload, enabled) {
   return { ...rest, isFetched, fetchStatus };
 }
 
+export function useGetRoles() {
+  const { isFetched, fetchStatus, ...rest } = useQuery({
+    queryKey: ["allRoles"],
+    queryFn: async () => {
+      const res = await apiClient.get(URIS.GET_ROLES);
+      if (res.ok) {
+        return res.data;
+      } else {
+        throw res.data;
+      }
+    },
+    retry: false,
+    refetchOnReconnect: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+  return { ...rest, isFetched, fetchStatus };
+}
+
 export function useInActiveStaff(config) {
   return useMutation({
     mutationFn: async (payload) => {

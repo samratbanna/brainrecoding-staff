@@ -4,7 +4,6 @@ import {
   Center,
   Flex,
   HStack,
-  Icon,
   Select,
   Text,
 } from "@chakra-ui/react";
@@ -12,19 +11,15 @@ import { filter, find, map, sumBy } from "lodash";
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { MdOutlineFeedback } from "react-icons/md";
 import { useLeadStore } from "@/store/lead";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LoadingContainer } from "../common/LoadingContainer";
 import { useLoginStore } from "@/store/login";
-import { LEADSTATUS, STATUS } from "@/constant";
+import { STATUS } from "@/constant";
 import { Controller, useForm } from "react-hook-form";
 import {
   PhoneIcon,
   TimeIcon,
-  QuestionOutlineIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
-  ArrowForwardIcon,
-  CheckCircleIcon,
   CalendarIcon,
   StarIcon,
   CheckIcon,
@@ -36,7 +31,7 @@ import {
 import { FiPhoneOff } from "react-icons/fi";
 import { ResponsivePie } from "@nivo/pie";
 
-import { useGetBottomHeirarchy, useGetTopHeirarchy } from "@/services/staff.service";
+import { useGetBottomHeirarchy, useGetRoles } from "@/services/staff.service";
 
 const statuses = [
   { label: "PENDING", color: "orange.50", icon: TimeIcon },
@@ -62,7 +57,16 @@ export const Dashboard = () => {
   }));
 
   const { data: teamList, isLoading } = useGetBottomHeirarchy({ staffId: userData?._id });
-  console.log("teamList", teamList);
+  const { data: rolesData } = useGetRoles();
+
+  // Map roleId → role name for fast lookup
+  const roleMap = useMemo(() => {
+    const map = {};
+    (rolesData || []).forEach((r) => { map[r._id] = r.name; });
+    return map;
+  }, [rolesData]);
+
+  const getRoleName = (roleId) => roleMap[roleId] || roleId;
 
   const { getDashboardAction, dashboardData, getDashboardStatus } =
     useLeadStore((s) => ({
@@ -126,7 +130,7 @@ export const Dashboard = () => {
         teamList,
         (staff) =>
           staff.stateManagerId === growthPartnerId &&
-          staff?.role === "TEAM_LEADER"
+          getRoleName(staff?.role) === "TEAM_LEADER"
       );
       setTeamLeader(teamLeadList);
       // getTeamDashboard({ growthPartnerId });
@@ -134,32 +138,23 @@ export const Dashboard = () => {
   }, [growthPartnerId]);
 
   useEffect(() => {
-    console.log("userData?.role", userData?.role);
-    if (userData?.role === "GROWTH_PARTNER") {
-      const teamLeadList = filter(teamList, (staff) => {
-        console.log("staff", staff?.stateManagerId, userData?._id, staff?.role);
-        return (
-          staff.stateManagerId === userData?._id &&
-          staff?.role === "TEAM_LEADER"
-        );
-      });
-      console.log("teamLeadList", teamLeadList);
-
-      // getTeamDashboard({ growthPartnerId: userData?._id });
-
+    const userRoleName = getRoleName(userData?.role);
+    if (userRoleName === "GROWTH_PARTNER") {
+      const teamLeadList = filter(teamList, (staff) =>
+        staff.stateManagerId === userData?._id &&
+        getRoleName(staff?.role) === "TEAM_LEADER"
+      );
       setTeamLeader(teamLeadList);
-    } else if (userData?.role === "TEAM_LEADER") {
+    } else if (userRoleName === "TEAM_LEADER") {
       const trainerList = filter(
         teamList,
         (staff) =>
-          staff.districtManagerId === userData?._id && staff?.role === "TRAINER"
+          staff.districtManagerId === userData?._id &&
+          getRoleName(staff?.role) === "TRAINER"
       );
       setTrainers(trainerList);
-      // getTeamDashboard({ teamLeaderId: userData?._id });
-    } else {
-      // getTeamDashboard({ trainerId: userData?._id });
     }
-  }, [userData?.role, teamList]);
+  }, [userData?.role, teamList, roleMap]);
 
   useEffect(() => {
     if (dashboardData) {
