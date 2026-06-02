@@ -38,9 +38,17 @@ export const URIS = {
   CALL_LOGS: "/CallLogs",
   ALL_CALL_LOGS: "/CallLogs/all",
 
-  GET_STATE_LIST: 'state/all',
-  GET_DISTRICT_LIST: 'district/all',
-  GET_AREA_LIST: 'area/all',
+  GET_STATE_LIST: "state/all",
+  GET_DISTRICT_LIST: "district/all",
+  GET_AREA_LIST: "area/all",
+
+  // Employee Dashboard API endpoints
+  EMPLOYEE_PERFORMANCE: "/employee-dashboard/staff-performance",
+  EMPLOYEE_PERFORMANCE_MIX: "/employee-dashboard/performance-mix",
+  EMPLOYEE_ACTIVITY_TIMELINE: "/employee-dashboard/activity-timeline",
+  EMPLOYEE_LEAD_STATUS_SNAPSHOT: "/employee-dashboard/lead-status-snapshot",
+  EMPLOYEE_SCORECARD: "/employee-dashboard/scorecard",
+  EMPLOYEE_RECENT_LEAD_TIMELINE: "/employee-dashboard/recent-lead-timeline",
 };
 
 let api = create({

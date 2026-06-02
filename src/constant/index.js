@@ -29,16 +29,11 @@ export const LEADSTATUS = [
   { title: 'Wrong Number', id: 'WRONG_NO' },
   { title: 'Duplicate', id: 'DUPLICATE' },
   { title: 'Not Interested', id: 'NOT_INTERESTED' },
-  { title: 'Low Follow-Up', id: 'LOW_FOLLOWUP' },
-  { title: 'Med Follow-Up', id: 'MED_FOLLOWUP' },
-  { title: 'High Follow-Up', id: 'HIGH_FOLLOWUP' },
+  { title: 'Follow-Up', id: 'FOLLOWUP' },
   { title: 'Meeting Scheduled', id: 'MEETING_SCHEDULED' },
   { title: 'Demo Scheduled', id: 'DEMO_SCHEDULED' },
   { title: 'In Process', id: 'IN_PROCESS' },
-  // { title: 'Registration Done', id:'DONE'},
-  // { title: 'Demo Finished', id:'FINISHED'},
   { title: 'Rejected', id: 'REJECTED' },
-  // { title: 'Converted', id:'CONVERTED'},
 ]
 
 export const TASK_STATUS = [
