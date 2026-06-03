@@ -144,7 +144,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             letterSpacing="-0.5px"
             color={textPrimary}
           >
-            Person X-Ray Dashboard
+            Staff Dashboard
           </Text>
           <Text fontSize="xs" color={textSecondary} fontWeight={600}>
             Deep performance view of one team member with activity, discipline,
@@ -257,31 +257,52 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         >
           {/* Staff Switcher */}
           {staffList.length > 0 && (
-            <Box minW="190px" maxW="280px" flex={1}>
-              <ChakraSelect
-                placeholder="Switch Staff..."
-                size="sm"
-                options={selectOptions}
-                value={selectedOption}
-                isSearchable
-                onChange={onStaffChange}
-                chakraStyles={{
-                  control: (provided) => ({
-                    ...provided,
-                    height: "38px",
-                    borderRadius: "lg",
-                    fontSize: "11px",
-                    fontWeight: "750",
-                    borderColor: "gray.200",
-                    backgroundColor: "white",
-                  }),
-                  menu: (provided) => ({
-                    ...provided,
-                    zIndex: 9999,
-                  }),
-                }}
-              />
-            </Box>
+            <HStack spacing={2} minW="190px" maxW="320px" flex={1}>
+              <Box flex={1}>
+                <ChakraSelect
+                  placeholder="Switch Staff..."
+                  size="sm"
+                  options={selectOptions}
+                  value={selectedOption}
+                  isSearchable
+                  onChange={onStaffChange}
+                  chakraStyles={{
+                    control: (provided) => ({
+                      ...provided,
+                      height: "38px",
+                      borderRadius: "lg",
+                      fontSize: "11px",
+                      fontWeight: "750",
+                      borderColor: "gray.200",
+                      backgroundColor: "white",
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      zIndex: 9999,
+                    }),
+                  }}
+                />
+              </Box>
+              {selectedStaffId && (
+                <Button
+                  size="sm"
+                  height="38px"
+                  px={3}
+                  borderRadius="lg"
+                  variant="outline"
+                  borderColor="gray.200"
+                  color="gray.500"
+                  fontSize="10px"
+                  fontWeight={700}
+                  leftIcon={<Icon as={BsPersonCheckFill} boxSize={3.5} />}
+                  _hover={{ bg: "green.50", borderColor: "green.400", color: "green.700" }}
+                  onClick={() => onStaffChange && onStaffChange(null)}
+                  flexShrink={0}
+                >
+                  My View
+                </Button>
+              )}
+            </HStack>
           )}
 
           {/* Interactive Date Range Popover */}

@@ -80,7 +80,7 @@ export const CallLogModal = ({ isOpen, onClose, leadId, status }) => {
           <ModalCloseButton />
           <ModalBody color={"black"}>
             <Box>
-              <FormControl isRequired mt={2}>
+              {/* <FormControl isRequired mt={2}>
                 <FormLabel>Remarks</FormLabel>
                 <Controller
                   control={control}
@@ -93,7 +93,7 @@ export const CallLogModal = ({ isOpen, onClose, leadId, status }) => {
                     />
                   )}
                 />
-              </FormControl>
+              </FormControl> */}
               <FormControl isRequired mt={4}>
                 <FormLabel>Call Status</FormLabel>
                 <Controller

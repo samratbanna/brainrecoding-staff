@@ -147,7 +147,7 @@ export const KpiCard: React.FC<{ item: KpiItem }> = ({ item }) => {
   return (
     <Box
       bg="white"
-      border="1px solid"
+      // border="1px solid"
       borderColor="gray.150"
       borderRadius="xl"
       p={2.5}
