@@ -72,8 +72,8 @@ export const LeadDrawer = ({ isOpen, onClose, leadsId }) => {
             <DataValue title="Modal" value={staffLead?.leadType} />
             <DataValue title="Status" value={status} />
             <DataValue
-              title="Lead Added At"
-              value={dayjs(createdAt).format("DD MMM, YYYY hh:mm a")}
+              title="Lead Assigned At"
+              value={dayjs(staffLead?.assignedAt).format("DD MMM, YYYY hh:mm a")}
             />
             <DataValue
               title="Address"
