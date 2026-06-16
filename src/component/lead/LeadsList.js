@@ -354,7 +354,7 @@ export const LeadsList = ({ payload }) => {
   const table = useReactTable(
     useMemo(
       () => ({
-        data: leadsDetails?.docs,
+        data: leadsDetails?.docs || [],
         columns,
         columnResizeMode: "onChange",
         getCoreRowModel: getCoreRowModel(),
