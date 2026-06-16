@@ -354,13 +354,13 @@ export const LeadsList = ({ payload }) => {
   const table = useReactTable(
     useMemo(
       () => ({
-        data: orderBy(leadsDetails?.docs, "createdAt", "desc") || [],
+        data: leadsDetails?.docs,
         columns,
         columnResizeMode: "onChange",
         getCoreRowModel: getCoreRowModel(),
       }),
-      [columns, leadsDetails]
-    )
+      [columns, leadsDetails],
+    ),
   );
 
   const handleLeadsDrawer = (id = null) => {
