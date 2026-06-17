@@ -451,7 +451,7 @@ export const LeadsList = ({ payload }) => {
     if (isTeleCaller) {
       params["telecallerId"] = userData?._id;
       _getLeads(params);
-    } else {
+    } else if (userData?._id) {
       params["staffId"] = userData?._id;
       _getLeads(params);
     }
